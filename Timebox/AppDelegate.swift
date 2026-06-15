@@ -7,6 +7,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
         menuBarController = MenuBarController()
-        try? SMAppService.mainApp.register()
+        do {
+            try SMAppService.mainApp.register()
+        } catch {
+            print("Login item registration failed: \(error)")
+        }
     }
 }
