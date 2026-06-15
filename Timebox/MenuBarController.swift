@@ -4,7 +4,7 @@ import UserNotifications
 class MenuBarController: NSObject {
     private var statusItem: NSStatusItem!
     private var popover: NSPopover?
-    private var overlayWindow: TimerOverlayWindow?
+    private let overlayWindow = TimerOverlayWindow()
     private var timer: Timer?
     private var duration: TimeInterval = 0
     private var elapsed: TimeInterval = 0
@@ -12,8 +12,10 @@ class MenuBarController: NSObject {
     override init() {
         super.init()
         setupStatusItem()
+        let center = UNUserNotificationCenter.current()
+        center.delegate = self
         Task {
-            try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound])
+            try? await center.requestAuthorization(options: [.alert])
         }
     }
 
@@ -50,8 +52,8 @@ class MenuBarController: NSObject {
         self.duration = duration
         self.elapsed = 0
 
-        overlayWindow = TimerOverlayWindow()
-        overlayWindow?.orderFront(nil)
+        overlayWindow.reset()
+        overlayWindow.orderFront(nil)
 
         timer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
             self?.tick()
@@ -61,14 +63,13 @@ class MenuBarController: NSObject {
     private func stopTimer() {
         timer?.invalidate()
         timer = nil
-        overlayWindow?.close()
-        overlayWindow = nil
+        overlayWindow.orderOut(nil)
     }
 
     private func tick() {
         elapsed += 0.05
         let progress = min(elapsed / duration, 1.0)
-        overlayWindow?.setProgress(progress)
+        overlayWindow.setProgress(progress)
 
         if progress >= 1.0 {
             finish()
@@ -79,17 +80,29 @@ class MenuBarController: NSObject {
         timer?.invalidate()
         timer = nil
 
-        let window = overlayWindow
-        overlayWindow = nil
-        window?.pulse { window?.close() }
+        overlayWindow.pulse { [weak self] in
+            self?.overlayWindow.orderOut(nil)
+        }
 
+        sendNotification()
+    }
+
+    private func sendNotification() {
         Task {
             let content = UNMutableNotificationContent()
             content.title = "Time's up!"
             content.body = "Your timebox is complete."
-            content.sound = .default
+            content.sound = nil
             let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
             try? await UNUserNotificationCenter.current().add(request)
         }
+    }
+}
+
+extension MenuBarController: UNUserNotificationCenterDelegate {
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                willPresent notification: UNNotification,
+                                withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.banner])
     }
 }

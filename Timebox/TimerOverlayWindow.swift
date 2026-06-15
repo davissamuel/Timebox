@@ -3,6 +3,7 @@ import AppKit
 class TimerOverlayWindow: NSWindow {
     private static let barHeight: CGFloat = 3
     private let progressLayer = CALayer()
+    private var pulseTimer: Timer?
 
     init() {
         let screen = NSScreen.screens.first { $0.frame.origin == .zero } ?? NSScreen.main!
@@ -30,6 +31,13 @@ class TimerOverlayWindow: NSWindow {
         container.layer?.addSublayer(progressLayer)
     }
 
+    func reset() {
+        pulseTimer?.invalidate()
+        pulseTimer = nil
+        alphaValue = 1.0
+        setProgress(0)
+    }
+
     func setProgress(_ progress: Double) {
         CATransaction.begin()
         CATransaction.setDisableActions(true)
@@ -49,12 +57,18 @@ class TimerOverlayWindow: NSWindow {
     }
 
     func pulse(completion: @escaping () -> Void) {
+        pulseTimer?.invalidate()
         var flashes = 0
-        Timer.scheduledTimer(withTimeInterval: 0.12, repeats: true) { [weak self] t in
+        pulseTimer = Timer.scheduledTimer(withTimeInterval: 0.12, repeats: true) { [weak self] t in
             flashes += 1
-            self?.alphaValue = flashes % 2 == 0 ? 1.0 : 0.0
+            let visible = flashes % 2 == 0
+            self?.alphaValue = visible ? 1.0 : 0.0
+            if visible {
+                NSHapticFeedbackManager.defaultPerformer.perform(.generic, performanceTime: .now)
+            }
             if flashes >= 6 {
                 t.invalidate()
+                self?.pulseTimer = nil
                 completion()
             }
         }
