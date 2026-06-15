@@ -7,15 +7,12 @@ A macOS menu bar app that displays a visual progress bar along the top edge of t
 ## Screenshots
 
 <img src="Screenshots/popover.png" width="280" alt="Timer input popover">
-
 *The popover — pick a preset or type any duration.*
 
 <img src="Screenshots/bar-green.png" width="100%" alt="Progress bar — green (early)">
-
 *Early in the session — bar is green.*
 
 <img src="Screenshots/bar-red.png" width="100%" alt="Progress bar — red (nearly done)">
-
 *Nearing the end — bar shifts to red.*
 
 ## What it does
