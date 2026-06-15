@@ -1,5 +1,7 @@
 # Timebox
 
+<img src="Timebox/Assets.xcassets/AppIcon.appiconset/timebox_app_icon 3.png" width="128" alt="Timebox app icon">
+
 A macOS menu bar app that displays a visual progress bar along the top edge of the screen — designed for MacBook models with a notch.
 
 ## What it does
