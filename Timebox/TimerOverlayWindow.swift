@@ -3,7 +3,11 @@ import AppKit
 class TimerOverlayWindow: NSWindow {
     private static let barHeight: CGFloat = 3
     private let progressLayer = CALayer()
+    private let rightProgressLayer = CALayer()
     private var pulseTimer: Timer?
+    private var leftWidth: CGFloat = 0
+    private var notchRight: CGFloat = 0
+    private var rightWidth: CGFloat = 0
 
     init() {
         let screen = NSScreen.screens.first { $0.frame.origin == .zero } ?? NSScreen.main!
@@ -22,6 +26,17 @@ class TimerOverlayWindow: NSWindow {
         ignoresMouseEvents = true
         collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
 
+        if let leftArea = screen.auxiliaryTopLeftArea,
+           let rightArea = screen.auxiliaryTopRightArea {
+            leftWidth = leftArea.width
+            notchRight = rightArea.minX
+            rightWidth = rightArea.width
+        } else {
+            leftWidth = frame.width
+            notchRight = frame.width
+            rightWidth = 0
+        }
+
         let container = NSView(frame: NSRect(origin: .zero, size: frame.size))
         container.wantsLayer = true
         contentView = container
@@ -29,6 +44,10 @@ class TimerOverlayWindow: NSWindow {
         progressLayer.frame = CGRect(x: 0, y: 0, width: 0, height: Self.barHeight)
         progressLayer.backgroundColor = NSColor.systemGreen.cgColor
         container.layer?.addSublayer(progressLayer)
+
+        rightProgressLayer.frame = CGRect(x: notchRight, y: 0, width: 0, height: Self.barHeight)
+        rightProgressLayer.backgroundColor = NSColor.systemGreen.cgColor
+        container.layer?.addSublayer(rightProgressLayer)
     }
 
     func reset() {
@@ -39,10 +58,18 @@ class TimerOverlayWindow: NSWindow {
     }
 
     func setProgress(_ progress: Double) {
+        let totalVisible = leftWidth + rightWidth
+        let fill = CGFloat(progress) * totalVisible
+        let leftFill = min(fill, leftWidth)
+        let rightFill = max(fill - leftWidth, 0)
+        let color = barColor(for: progress).cgColor
+
         CATransaction.begin()
         CATransaction.setDisableActions(true)
-        progressLayer.frame.size.width = frame.width * CGFloat(progress)
-        progressLayer.backgroundColor = barColor(for: progress).cgColor
+        progressLayer.frame.size.width = leftFill
+        rightProgressLayer.frame.size.width = rightFill
+        progressLayer.backgroundColor = color
+        rightProgressLayer.backgroundColor = color
         CATransaction.commit()
     }
 
