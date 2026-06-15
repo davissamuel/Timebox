@@ -36,8 +36,8 @@ class MenuBarController: NSObject {
 
         guard let button = statusItem.button else { return }
 
-        let vc = TimerInputViewController(isRunning: timer != nil)
-        vc.onStart = { [weak self] minutes in self?.startTimer(duration: minutes * 60) }
+        let vc = TimerInputViewController(isRunning: timer != nil, remaining: duration - elapsed)
+        vc.onStart = { [weak self] seconds in self?.startTimer(duration: seconds) }
         vc.onStop = { [weak self] in self?.stopTimer() }
 
         let p = NSPopover()

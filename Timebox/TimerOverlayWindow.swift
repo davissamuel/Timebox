@@ -1,7 +1,7 @@
 import AppKit
 
 class TimerOverlayWindow: NSWindow {
-    private static let barHeight: CGFloat = 3
+    private static let barHeight: CGFloat = 5
     private let progressLayer = CALayer()
     private let rightProgressLayer = CALayer()
     private var pulseTimer: Timer?
@@ -74,11 +74,11 @@ class TimerOverlayWindow: NSWindow {
     }
 
     private func barColor(for progress: Double) -> NSColor {
-        if progress <= 0.5 {
-            let t = CGFloat(progress / 0.5)
+        if progress <= 0.7 {
+            let t = CGFloat(progress / 0.7)
             return NSColor(red: t, green: 1.0, blue: 0, alpha: 1)
         } else {
-            let t = CGFloat((progress - 0.5) / 0.5)
+            let t = CGFloat((progress - 0.7) / 0.3)
             return NSColor(red: 1.0, green: 1.0 - t, blue: 0, alpha: 1)
         }
     }
