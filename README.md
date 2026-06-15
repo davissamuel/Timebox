@@ -2,7 +2,7 @@
 
 <img src="Timebox/Assets.xcassets/AppIcon.appiconset/timebox_app_icon 3.png" width="128" alt="Timebox app icon">
 
-A macOS menu bar app that displays a visual progress bar along the top edge of the screen — designed for MacBook models with a notch.
+A macOS menu bar app that displays a visual progress bar along the top edge of the screen — works on all MacBooks, with or without a notch.
 
 ## What it does
 
@@ -17,7 +17,7 @@ A macOS menu bar app that displays a visual progress bar along the top edge of t
 ## Requirements
 
 - macOS 26+ (Tahoe)
-- MacBook with a notch (MacBook Air M2+, MacBook Pro M1+)
+- Any MacBook (notch and non-notch models detected automatically)
 
 ## Setup
 

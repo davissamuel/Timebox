@@ -28,12 +28,14 @@ class TimerOverlayWindow: NSWindow {
 
         if let leftArea = screen.auxiliaryTopLeftArea,
            let rightArea = screen.auxiliaryTopRightArea {
-            leftWidth = leftArea.width
+            // maxX = x where the notch begins; minX = x where the right side resumes
+            leftWidth = leftArea.maxX
             notchRight = rightArea.minX
-            rightWidth = rightArea.width
+            rightWidth = screen.frame.width - rightArea.minX
         } else {
-            leftWidth = frame.width
-            notchRight = frame.width
+            // No notch: single bar spans the full screen width
+            leftWidth = screen.frame.width
+            notchRight = screen.frame.width
             rightWidth = 0
         }
 
