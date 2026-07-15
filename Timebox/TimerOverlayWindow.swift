@@ -10,6 +10,33 @@ class TimerOverlayWindow: NSWindow {
     private var rightWidth: CGFloat = 0
 
     init() {
+        super.init(contentRect: .zero, styleMask: .borderless, backing: .buffered, defer: false)
+
+        isOpaque = false
+        backgroundColor = .clear
+        level = .screenSaver
+        ignoresMouseEvents = true
+        collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
+
+        let container = NSView(frame: .zero)
+        container.wantsLayer = true
+        contentView = container
+
+        progressLayer.frame = CGRect(x: 0, y: 0, width: 0, height: Self.barHeight)
+        progressLayer.backgroundColor = NSColor.systemGreen.cgColor
+        container.layer?.addSublayer(progressLayer)
+
+        rightProgressLayer.frame = CGRect(x: 0, y: 0, width: 0, height: Self.barHeight)
+        rightProgressLayer.backgroundColor = NSColor.systemGreen.cgColor
+        container.layer?.addSublayer(rightProgressLayer)
+
+        updateGeometry()
+    }
+
+    // The screen arrangement (resolution, notch, docked monitors) can change while this
+    // long-lived login-item window sits idle, so geometry is recomputed on every run
+    // instead of being cached once at launch.
+    private func updateGeometry() {
         let screen = NSScreen.screens.first { $0.frame.origin == .zero } ?? NSScreen.main!
         let frame = NSRect(
             x: screen.frame.minX,
@@ -17,14 +44,8 @@ class TimerOverlayWindow: NSWindow {
             width: screen.frame.width,
             height: Self.barHeight
         )
-
-        super.init(contentRect: frame, styleMask: .borderless, backing: .buffered, defer: false)
-
-        isOpaque = false
-        backgroundColor = .clear
-        level = .screenSaver
-        ignoresMouseEvents = true
-        collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
+        setFrame(frame, display: false)
+        contentView?.frame = NSRect(origin: .zero, size: frame.size)
 
         if let leftArea = screen.auxiliaryTopLeftArea,
            let rightArea = screen.auxiliaryTopRightArea {
@@ -39,23 +60,14 @@ class TimerOverlayWindow: NSWindow {
             rightWidth = 0
         }
 
-        let container = NSView(frame: NSRect(origin: .zero, size: frame.size))
-        container.wantsLayer = true
-        contentView = container
-
-        progressLayer.frame = CGRect(x: 0, y: 0, width: 0, height: Self.barHeight)
-        progressLayer.backgroundColor = NSColor.systemGreen.cgColor
-        container.layer?.addSublayer(progressLayer)
-
-        rightProgressLayer.frame = CGRect(x: notchRight, y: 0, width: 0, height: Self.barHeight)
-        rightProgressLayer.backgroundColor = NSColor.systemGreen.cgColor
-        container.layer?.addSublayer(rightProgressLayer)
+        rightProgressLayer.frame.origin.x = notchRight
     }
 
     func reset() {
         pulseTimer?.invalidate()
         pulseTimer = nil
         alphaValue = 1.0
+        updateGeometry()
         setProgress(0)
     }
 
